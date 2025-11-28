@@ -5,8 +5,7 @@ import '../utils/error_handler.dart';
 import '../../config/exceptions.dart';
 import '../../config/config.dart';
 
-class ApiClient implements IApiClient
-{
+class ApiClient implements IApiClient {
     final String baseUrl;
     @override
     String? token;
@@ -26,42 +25,45 @@ class ApiClient implements IApiClient
     /// Vérifie si le token est expiré.
     bool get isTokenExpired => tokenExpiry != null && DateTime.now().isAfter(tokenExpiry!);
 
-    Map<String, String> get _headers
-    {
+    Map<String, String> get _headers {
         final headers = {'Content-Type': 'application/json'};
-        if (token != null && !isTokenExpired) headers['Authorization'] = 'Bearer $token';
+        if (token != null && !isTokenExpired) {
+            headers['Authorization'] = 'Bearer $token';
+        }
         return headers;
     }
 
     @override
-    Future<Map<String, dynamic>> get(String path) async
-    {
+    Future<Map<String, dynamic>> get(String path) async {
         return await ErrorHandler.withRetry(() async {
-            final res = await http.get(Uri.parse('$baseUrl$path'), headers: _headers);
+            final res = await http.get(
+                Uri.parse('$baseUrl$path'),
+                headers: _headers,
+            );
             return _processResponse(res);
         });
     }
 
     @override
-    Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body) async
-    {
+    Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body) async {
         return await ErrorHandler.withRetry(() async {
-            final res = await http.post(Uri.parse('$baseUrl$path'),
-            headers: _headers, body: jsonEncode(body));
+            final res = await http.post(
+                Uri.parse('$baseUrl$path'),
+                headers: _headers,
+                body: jsonEncode(body),
+            );
             return _processResponse(res);
         });
     }
 
-    Map<String, dynamic> _processResponse(http.Response res)
-    {
+    Map<String, dynamic> _processResponse(http.Response res) {
         final data = jsonDecode(res.body);
-        if (res.statusCode >= 200 && res.statusCode < 300)
-        {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
             return data;
-        } else
-        {
-            ErrorHandler.checkStatusCode(res.statusCode, data['message'] ?? 'Erreur API');
-            throw ApiException(data['message'] ?? 'Erreur API', statusCode: res.statusCode);
+        } else {
+            final message = data['message'] ?? 'Erreur API';
+            ErrorHandler.checkStatusCode(res.statusCode, message);
+            throw ApiException(message, statusCode: res.statusCode);
         }
     }
 }

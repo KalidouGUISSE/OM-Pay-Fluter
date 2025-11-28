@@ -1,20 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_1/views/router/router.dart';
 import 'package:flutter_application_1/theme/theme_provider.dart';
+import 'package:flutter_application_1/theme/auth_provider.dart';
+import 'package:flutter_application_1/core/services/api_client.dart';
+import 'package:flutter_application_1/services/implement/auth_service.dart';
+import 'package:flutter_application_1/config/config.dart';
 
-void main() {
-  runApp(const OrangeMoneyApp());
+void main() async {
+  // Initialiser Config depuis config.yaml
+  Config.load();
+  
+  // Initialiser SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  
+  runApp(OrangeMoneyApp(prefs: prefs));
 }
 
 class OrangeMoneyApp extends StatelessWidget {
-  const OrangeMoneyApp({super.key});
+  final SharedPreferences prefs;
+  
+  const OrangeMoneyApp({required this.prefs, super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Créer l'ApiClient avec l'URL depuis Config
+    final apiClient = ApiClient(baseUrl: Config.baseUrl);
+    
+    // Créer l'AuthService
+    final authService = AuthService(apiClient);
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService: authService, prefs: prefs),
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

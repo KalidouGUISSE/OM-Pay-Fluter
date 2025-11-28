@@ -1,5 +1,4 @@
 import '../models/transaction.dart';
-import '../models/compte.dart';
 
 abstract class ITransactionService {
     Future<List<Transaction>> getAllTransactions();

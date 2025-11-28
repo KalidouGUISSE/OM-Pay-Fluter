@@ -1,5 +1,5 @@
 api:
-  base_url: "https://api.ompay.com/v1"
+  base_url: "https://221784457686"
   timeout: 30000
   retry_attempts: 3
 
