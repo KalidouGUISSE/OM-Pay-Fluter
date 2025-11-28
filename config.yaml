@@ -1,0 +1,11 @@
+api:
+  base_url: "https://api.ompay.com/v1"
+  timeout: 30000
+  retry_attempts: 3
+
+app:
+  token_expiry_minutes: 60
+  cache_ttl_minutes: 5
+
+logging:
+  level: "INFO"
