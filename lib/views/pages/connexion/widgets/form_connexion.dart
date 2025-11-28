@@ -34,12 +34,24 @@ class _FormConnexionState extends State<FormConnexion> {
     });
 
     try {
-      // Simulation d'une connexion réussie
-      await Future.delayed(const Duration(seconds: 2));
+      // validation minimale du numéro : ne doit contenir que des chiffres et
+      // comporter 9 chiffres (numéro local sénégalais sans le préfixe)
+      final cleaned = phoneNumber.replaceAll(RegExp(r'\D'), '');
+      if (!RegExp(r'^\d{9}$').hasMatch(cleaned)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Numéro invalide. Entrez 9 chiffres.')),
+          );
+        }
+        return;
+      }
 
-      // Navigation vers la page d'accueil
+      // Simulation d'une opération réseau avant d'aller vérifier l'OTP
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Navigation vers la page de vérification OTP en passant le numéro nettoyé
       if (mounted) {
-        Navigator.of(context).pushReplacementNamed('/home');
+        Navigator.of(context).pushReplacementNamed('/verify-otp', arguments: cleaned);
       }
     } catch (e) {
       if (mounted) {
@@ -58,9 +70,14 @@ class _FormConnexionState extends State<FormConnexion> {
 
   @override
   Widget build(BuildContext context) {
-    return ClipPath(
-      clipper: Bordure(),
-      child: Container(
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: ClipPath(
+        clipper: Bordure(),
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 30),
         decoration: BoxDecoration(
@@ -167,6 +184,9 @@ class _FormConnexionState extends State<FormConnexion> {
           ],
         ),
       ),
-    );
+    ),
+  ),
+);
+
   }
 }
