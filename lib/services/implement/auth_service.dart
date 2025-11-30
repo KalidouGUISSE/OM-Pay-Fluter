@@ -5,6 +5,7 @@ import '../../config/exceptions.dart';
 import '../../models/me_response.dart';
 import '../../models/login_initiate_response.dart';
 import '../../models/login_verify_response.dart';
+import 'package:flutter/material.dart';
 
 class AuthService implements IAuthService {
     final IApiClient apiClient;
@@ -19,6 +20,7 @@ class AuthService implements IAuthService {
         final formattedNumber = _formatPhoneNumber(numero);
         final response = await apiClient.post('/api/v1/auth/initiate-login', 
             {'numeroTelephone': formattedNumber});
+        print("{}{}{}{}{}{}{}{}{}} \n $response \n");
         final initiateResponse = LoginInitiateResponse.fromJson(response);
         if (!initiateResponse.isValid()) {
             throw ApiException('Réponse invalide du serveur');
@@ -31,8 +33,14 @@ class AuthService implements IAuthService {
         if (!Validator.isValidOtp(otp)) {
             throw ValidationException('OTP invalide');
         }
-        final response = await apiClient.post('/api/v1/auth/verify-otp', 
-            {'token': token, 'otp': otp});
+        // Définir temporairement le token pour l'authentification
+        apiClient.setToken(token);
+        final response = await apiClient.post('/api/v1/auth/verify-otp', {'token': token, 'otp': otp});
+        
+        print('\n[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[================response===============]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n');
+        debugPrint("return response: $response");
+        print('\n[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[================response===============]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n');
+        
         final verifyResponse = LoginVerifyResponse.fromJson(response);
         if (!verifyResponse.isValid()) {
             throw ApiException('Réponse invalide du serveur');
@@ -53,6 +61,12 @@ class AuthService implements IAuthService {
     @override
     Future<MeResponse> me() async{
         final response = await apiClient.get('/api/v1/auth/me');
+            
+        print('\n[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[================response= api/v1/auth/me =============]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n');
+        debugPrint("return response: $response");
+        print('\n[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[================response== api/v1/auth/me ============]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n');
+        
+
         return MeResponse.fromJson(response);
     }
 

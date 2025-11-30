@@ -6,7 +6,7 @@ class Config {
   static late Map<String, dynamic> _config;
   
   // Valeurs par défaut
-  static const String _defaultBaseUrl = 'http://localhost:8000';
+  static const String _defaultBaseUrl = 'https://om-pay.onrender.com';
   static const int _defaultTimeout = 30000;
   static const int _defaultRetryAttempts = 3;
   static const int _defaultTokenExpiryMinutes = 60;

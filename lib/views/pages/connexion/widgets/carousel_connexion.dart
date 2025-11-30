@@ -23,7 +23,7 @@ class CarouselConnexion extends StatelessWidget {
             subtitle: "Envoyez de l'argent",
             description:
                 "Envoyez ou recevez de l'argent  et en toute sécurité de l'argent  à un proche  qui possede  un compte  OrangeMoney",
-            logoPath: "assets/images//logo.png",
+            logoPath: "assets/images/logo.png",
           ),
           buildItem(
             "assets/images/image2.png",

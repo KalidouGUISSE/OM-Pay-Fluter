@@ -32,7 +32,7 @@ void main() {
       });
 
       // Act
-      final result = await authService.initiateLogin('784457686');
+      final result = await authService.initiateLogin('0784457686');
 
       // Assert
       expect(result['success'], true);
@@ -67,8 +67,11 @@ void main() {
       expect(result['success'], true);
       expect(result['data']['access_token'], 'jwt_token_123');
 
-      // Verify que setToken a été appelé
-      verify(mockApiClient.setToken('jwt_token_123')).called(1);
+      // Verify que setToken a été appelé avec le temp_token puis avec l'access_token
+      verifyInOrder([
+        mockApiClient.setToken('temp_token'),
+        mockApiClient.setToken('jwt_token_123'),
+      ]);
     });
   });
 }

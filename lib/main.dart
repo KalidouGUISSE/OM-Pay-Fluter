@@ -9,6 +9,8 @@ import 'package:flutter_application_1/services/implement/auth_service.dart';
 import 'package:flutter_application_1/config/config.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   // Initialiser Config depuis config.yaml
   Config.load();
   

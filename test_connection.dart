@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() async {
-  final url = 'https://221784457686/api/v1/auth/initiate-login';
+  final url = 'https://221784458786/api/v1/auth/initiate-login';
   final headers = {'Content-Type': 'application/json'};
-  final body = jsonEncode({'numeroTelephone': '+221784457686'});
+  final body = jsonEncode({'numeroTelephone': '+221784458786'});
 
   print('Testing connection to: $url');
   print('Headers: $headers');

@@ -26,9 +26,13 @@ class ApiClient implements IApiClient {
     bool get isTokenExpired => tokenExpiry != null && DateTime.now().isAfter(tokenExpiry!);
 
     Map<String, String> get _headers {
-        final headers = {'Content-Type': 'application/json'};
+        final headers = {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '',
+        };
         if (token != null && !isTokenExpired) {
             headers['Authorization'] = 'Bearer $token';
+            headers['X-Temp-Token'] = token!;
         }
         return headers;
     }
@@ -46,12 +50,24 @@ class ApiClient implements IApiClient {
 
     @override
     Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body) async {
+        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========body============}}}}}}}}}}}}}}}}}}}\n');
+        // print(body);
+        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========body============}}}}}}}}}}}}}}}}}}}\n');
+        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========headers============}}}}}}}}}}}}}}}}}}}\n');
+        // print(_headers);
+        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========headers============}}}}}}}}}}}}}}}}}}}\n');
         return await ErrorHandler.withRetry(() async {
             final res = await http.post(
                 Uri.parse('$baseUrl$path'),
                 headers: _headers,
                 body: jsonEncode(body),
-            );
+            ).timeout(const Duration(seconds: 30));
+            // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{}}}}}}}}}}}}}}}}}}}\n');
+            // print("$baseUrl$path");
+            // print('Status Code: ${res.statusCode}');
+            // print('Response Body: ${res.body}');
+            // print(_processResponse(res));
+            // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{}}}}}}}}}}}}}}}}}}}\n');
             return _processResponse(res);
         });
     }

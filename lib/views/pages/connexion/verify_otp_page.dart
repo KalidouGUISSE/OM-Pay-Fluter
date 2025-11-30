@@ -40,6 +40,9 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       
       // Vérifier l'OTP
       final success = await authProvider.verifyOtp(otp);
+
+      print('\n[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[================success===============]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n');
+      print('\n     $success             \n');
       
       if (mounted) {
         if (success) {
@@ -86,6 +89,12 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
       appBar: AppBar(
         title: const Text('Vérifier le code OTP'),
         backgroundColor: const Color(0xFFFF6600),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {

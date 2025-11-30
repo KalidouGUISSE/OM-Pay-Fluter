@@ -9,6 +9,7 @@ class AuthProvider extends ChangeNotifier {
   final SharedPreferences prefs;
 
   String? _tempToken;
+  DateTime? _tempTokenExpiry;
   String? _accessToken;
   String? _refreshToken;
   String? _numeroTelephone;
@@ -22,6 +23,7 @@ class AuthProvider extends ChangeNotifier {
 
   // Getters
   String? get tempToken => _tempToken;
+  DateTime? get tempTokenExpiry => _tempTokenExpiry;
   String? get accessToken => _accessToken;
   String? get refreshToken => _refreshToken;
   String? get numeroTelephone => _numeroTelephone;
@@ -29,6 +31,7 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get isAuthenticated => _accessToken != null && _accessToken!.isNotEmpty;
+  bool get isTempTokenExpired => _tempTokenExpiry != null && DateTime.now().isAfter(_tempTokenExpiry!);
 
   /// Charge les données stockées depuis SharedPreferences
   void _loadStoredData() {
@@ -50,6 +53,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       final response = await authService.initiateLogin(numero);
       _tempToken = response['data']['temp_token'];
+      _tempTokenExpiry = DateTime.now().add(Duration(seconds: response['data']['expires_in']));
       _numeroTelephone = numero;
       _isLoading = false;
       notifyListeners();
@@ -70,23 +74,36 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
 
+    if (isTempTokenExpired) {
+      _error = 'Token temporaire expiré. Veuillez recommencer la connexion.';
+      _tempToken = null;
+      _tempTokenExpiry = null;
+      notifyListeners();
+      return false;
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
       final response = await authService.verifyOtp(_tempToken!, otp);
+
       _accessToken = response['data']['access_token'];
       _refreshToken = response['data']['refresh_token'];
-      
+
+      // Définir le token d'accès dans le client API
+      authService.apiClient.setToken(_accessToken!);
+
       // Stocker les tokens
       await prefs.setString('access_token', _accessToken!);
       await prefs.setString('refresh_token', _refreshToken!);
       if (_numeroTelephone != null) {
         await prefs.setString('numero_telephone', _numeroTelephone!);
       }
-      
+
       _tempToken = null; // Nettoyer le token temporaire
+      _tempTokenExpiry = null;
       _isLoading = false;
       notifyListeners();
       return true;
@@ -133,14 +150,15 @@ class AuthProvider extends ChangeNotifier {
     _accessToken = null;
     _refreshToken = null;
     _tempToken = null;
+    _tempTokenExpiry = null;
     _userData = null;
     _numeroTelephone = null;
     _error = null;
-    
+
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
     await prefs.remove('numero_telephone');
-    
+
     authService.apiClient.token = null;
     notifyListeners();
   }
