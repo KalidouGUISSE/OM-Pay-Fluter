@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'widgets/home_drawer.dart';
 import 'widgets/historique_widget.dart';
 import 'widgets/scanner_page.dart';
+import 'package:flutter_application_1/theme/auth_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,6 +15,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedOperation = 'payer'; // 'payer' ou 'transferer'
   bool isBalanceVisible = false; // Contrôle la visibilité du solde
+
+  @override
+  void initState() {
+    super.initState();
+    // Assurer que les données utilisateur sont chargées
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated && authProvider.userData == null) {
+        authProvider.fetchUserData();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -490,7 +504,12 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 12),
 
             // Historique
-            const HistoriqueWidget(),
+            Consumer<AuthProvider>(
+              builder: (context, authProvider, child) {
+                final transactions = authProvider.userData?.dernieresTransactions ?? [];
+                return HistoriqueWidget(transactions: transactions);
+              },
+            ),
 
             const SizedBox(height: 20),
           ],
