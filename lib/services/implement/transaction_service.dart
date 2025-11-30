@@ -43,13 +43,20 @@ class TransactionService implements ITransactionService{
             return cached;
         }
         final result = await apiClient.get('/api/v1/compte/${apiClient.numero}/solde');
-
+        print("{{{{{{{{{{{{{{{{{{{{{===========result==========}}}}}}}}}}}}}}}}}}}}}");
+        print(result);
+        print("{{{{{{{{{{{{{{{{{{{{{===========result==========}}}}}}}}}}}}}}}}}}}}}");
         final soldeStr = result['data']['solde']?.toString();
 
         // Convertir proprement en double
         final solde = double.tryParse(soldeStr ?? '0') ?? 0.0;
 
         SimpleCache.set(cacheKey, solde, Duration(minutes: Config.cacheTtlMinutes));
+
+        print("{{{{{{{{{{{{{{{{{{{{{===========solde==========}}}}}}}}}}}}}}}}}}}}}");
+        print(solde);
+        print("{{{{{{{{{{{{{{{{{{{{{===========solde==========}}}}}}}}}}}}}}}}}}}}}");
+
         return solde;
     }
 

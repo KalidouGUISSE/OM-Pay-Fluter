@@ -44,6 +44,9 @@ class ApiClient implements IApiClient {
                 Uri.parse('$baseUrl$path'),
                 headers: _headers,
             );
+            print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========baseUrl============}}}}}}}}}}}}}}}}}}}\n');
+            print('$baseUrl$path');
+            print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========baseUrl============}}}}}}}}}}}}}}}}}}}\n');
             return _processResponse(res);
         });
     }

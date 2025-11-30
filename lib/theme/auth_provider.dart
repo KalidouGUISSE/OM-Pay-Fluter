@@ -38,9 +38,10 @@ class AuthProvider extends ChangeNotifier {
     _accessToken = prefs.getString('access_token');
     _refreshToken = prefs.getString('refresh_token');
     _numeroTelephone = prefs.getString('numero_telephone');
-    
+
     if (_accessToken != null) {
       authService.apiClient.setToken(_accessToken!);
+      // Le numéro sera défini lors de fetchUserData()
     }
   }
 
@@ -131,6 +132,10 @@ class AuthProvider extends ChangeNotifier {
       final response = await authService.me();
       if (response.isValid()) {
         _userData = response.data;
+        // Définir le numéro de compte dans le client API
+        if (_userData?.compte.numero_telephone != null) {
+          authService.apiClient.numero = _userData!.compte.numero_telephone;
+        }
         _isLoading = false;
         notifyListeners();
         return true;
@@ -160,6 +165,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('numero_telephone');
 
     authService.apiClient.token = null;
+    authService.apiClient.numero = null;
     notifyListeners();
   }
 

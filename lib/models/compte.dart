@@ -1,7 +1,7 @@
 class Compte {
     final String id;               // UUID
     final String numeroCompte;
-    final String? numeroTelephone;
+    final String? numero_telephone;
     final String type;             // simple | marchand
     final String statut;           // actif | bloque | ferme
     final DateTime dateCreation;
@@ -11,7 +11,7 @@ class Compte {
     Compte({
         required this.id,
         required this.numeroCompte,
-        this.numeroTelephone,
+        this.numero_telephone,
         required this.type,
         required this.statut,
         required this.dateCreation,
@@ -23,7 +23,7 @@ class Compte {
         return Compte(
         id: json['id'] as String? ?? '',
         numeroCompte: json['numero_compte'] as String? ?? json['numeroCompte'] as String? ?? '',
-        numeroTelephone: json['numeroTelephone'] as String?,
+        numero_telephone: json['numero_telephone'] as String?,
         type: json['type'] as String? ?? '',
         statut: json['statut'] as String? ?? '',
         dateCreation: DateTime.tryParse(json['date_creation'] as String? ?? json['dateCreation'] as String? ?? '') ?? DateTime.now(),
@@ -36,7 +36,7 @@ class Compte {
         return {
         'id': id,
         'numeroCompte': numeroCompte,
-        'numeroTelephone': numeroTelephone,
+        'numero_telephone': numero_telephone,
         'type': type,
         'statut': statut,
         'dateCreation': dateCreation.toIso8601String(),

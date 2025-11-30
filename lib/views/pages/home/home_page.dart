@@ -4,6 +4,7 @@ import 'widgets/home_drawer.dart';
 import 'widgets/historique_widget.dart';
 import 'widgets/scanner_page.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
+import 'package:flutter_application_1/theme/transaction_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -51,116 +53,157 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             // HEADER - Bonjour et QR Code
-            Container(
-              padding: const EdgeInsets.all(20),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: headerBg,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(30),
-                  bottomRight: Radius.circular(30),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 60),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Consumer2<AuthProvider, TransactionProvider>(
+              builder: (context, authProvider, transactionProvider, child) {
+                final userName = authProvider.userData?.user.nom ?? 'Utilisateur';
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: headerBg,
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(30),
+                      bottomRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Bonjour et Kalidou sur la même ligne
-                            RichText(
-                              text: const TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Bonjour ",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.normal,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "Kalidou",
-                                    style: TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
+                      const SizedBox(height: 60),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (!isBalanceVisible)
-                                  const Text(
-                                    "★★★★★★★★ ",
-                                    style: TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                if (isBalanceVisible)
-                                  const Text(
-                                    "125 000 ",
-                                    style: TextStyle(
-                                      color: Colors.orange,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                const Text(
-                                  "FCFA ",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.bold,
+                                // Bonjour et nom utilisateur sur la même ligne
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: "Bonjour ",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: userName,
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      isBalanceVisible = !isBalanceVisible;
-                                    });
-                                  },
-                                  child: Icon(
-                                    isBalanceVisible ? Icons.visibility : Icons.visibility_off,
-                                    color: Colors.white,
-                                    size: 24,
-                                  ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    if (!isBalanceVisible)
+                                      const Text(
+                                        "★★★★★★★★ ",
+                                        style: TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    if (isBalanceVisible && transactionProvider.balance != null)
+                                      Text(
+                                        "${transactionProvider.balance!.toStringAsFixed(0)} ",
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    if (isBalanceVisible && transactionProvider.balance == null && !transactionProvider.isLoadingBalance)
+                                      const Text(
+                                        "0 ",
+                                        style: TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    if (transactionProvider.isLoadingBalance)
+                                      const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                                        ),
+                                      ),
+                                    const Text(
+                                      "FCFA ",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () async {
+                                        // Toujours récupérer le solde à chaque clic
+                                        final success = await transactionProvider.fetchBalance();
+                                        if (success) {
+                                          setState(() {
+                                            isBalanceVisible = !isBalanceVisible;
+                                          });
+                                        } else {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(
+                                                content: Text('Erreur: ${transactionProvider.balanceError ?? "Impossible de récupérer le solde"}'),
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            );
+                                            transactionProvider.clearBalanceError();
+                                          }
+                                        }
+                                      },
+                                      child: Icon(
+                                        isBalanceVisible ? Icons.visibility : Icons.visibility_off,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.white, width: 3),
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        padding: const EdgeInsets.all(6),
-                        child: Container(
-                          width: 90,
-                          height: 90,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.qr_code_2, color: Colors.black, size: 70),
-                        ),
+                          const SizedBox(
+                            width: 102,
+                            height: 102,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border.fromBorderSide(BorderSide(color: Colors.white, width: 3)),
+                                borderRadius: BorderRadius.all(Radius.circular(18)),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(6),
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                                  ),
+                                  child: Icon(Icons.qr_code_2, color: Colors.black, size: 70),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             ),
 
             const SizedBox(height: 16),
@@ -496,7 +539,7 @@ class _HomePageState extends State<HomePage> {
                       color: cardText,
                     ),
                   ),
-                  Icon(Icons.refresh, color: Colors.orange, size: 20),
+                  const Icon(Icons.refresh, color: Colors.orange, size: 20),
                 ],
               ),
             ),

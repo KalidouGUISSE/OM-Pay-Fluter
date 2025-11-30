@@ -4,8 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_1/views/router/router.dart';
 import 'package:flutter_application_1/theme/theme_provider.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
+import 'package:flutter_application_1/theme/transaction_provider.dart';
 import 'package:flutter_application_1/core/services/api_client.dart';
 import 'package:flutter_application_1/services/implement/auth_service.dart';
+import 'package:flutter_application_1/services/implement/transaction_service.dart';
 import 'package:flutter_application_1/config/config.dart';
 
 void main() async {
@@ -38,6 +40,9 @@ class OrangeMoneyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService: authService, prefs: prefs),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => TransactionProvider(transactionService: TransactionService(apiClient)),
         ),
       ],
       child: Consumer<ThemeProvider>(
