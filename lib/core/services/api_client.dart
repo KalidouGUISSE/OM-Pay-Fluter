@@ -43,7 +43,7 @@ class ApiClient implements IApiClient {
             final res = await http.get(
                 Uri.parse('$baseUrl$path'),
                 headers: _headers,
-            );
+            ).timeout(Duration(milliseconds: Config.timeout));
             print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========baseUrl============}}}}}}}}}}}}}}}}}}}\n');
             print('$baseUrl$path');
             print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========baseUrl============}}}}}}}}}}}}}}}}}}}\n');
@@ -64,7 +64,7 @@ class ApiClient implements IApiClient {
                 Uri.parse('$baseUrl$path'),
                 headers: _headers,
                 body: jsonEncode(body),
-            ).timeout(const Duration(seconds: 30));
+            ).timeout(Duration(milliseconds: Config.timeout));
             // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{}}}}}}}}}}}}}}}}}}}\n');
             // print("$baseUrl$path");
             // print('Status Code: ${res.statusCode}');

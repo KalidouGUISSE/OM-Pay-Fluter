@@ -8,7 +8,7 @@ class ErrorHandler {
   /// Exécute une fonction avec retry automatique en cas d'échec.
   static Future<T> withRetry<T>(Future<T> Function() fn) async {
     final r = RetryOptions(maxAttempts: Config.retryAttempts);
-    return r.retry(fn, retryIf: (e) => e is ApiException && (e.statusCode == 500 || e.statusCode == 502));
+    return r.retry(fn, retryIf: (e) => e is ApiException && (e.statusCode == 500 || e.statusCode == 502) || e is TimeoutException);
   }
 
   /// Gère les erreurs API et lance des exceptions personnalisées.

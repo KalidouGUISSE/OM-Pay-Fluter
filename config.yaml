@@ -1,6 +1,6 @@
 api:
-  base_url: "https://221784457686"
-  timeout: 30000
+  base_url: "https://om-pay.onrender.com"
+  timeout: 60000
   retry_attempts: 3
 
 app:

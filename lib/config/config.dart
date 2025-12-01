@@ -7,7 +7,7 @@ class Config {
   
   // Valeurs par défaut
   static const String _defaultBaseUrl = 'https://om-pay.onrender.com';
-  static const int _defaultTimeout = 30000;
+  static const int _defaultTimeout = 60000;
   static const int _defaultRetryAttempts = 3;
   static const int _defaultTokenExpiryMinutes = 60;
   static const int _defaultCacheTtlMinutes = 5;

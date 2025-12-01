@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() async {
-  final url = 'https://221784458786/api/v1/auth/initiate-login';
+  final url = 'https://om-pay.onrender.com/api/v1/auth/initiate-login';
   final headers = {'Content-Type': 'application/json'};
   final body = jsonEncode({'numeroTelephone': '+221784458786'});
 
@@ -15,7 +15,7 @@ void main() async {
       Uri.parse(url),
       headers: headers,
       body: body,
-    );
+    ).timeout(const Duration(seconds: 30));
 
     print('\nResponse Status Code: ${response.statusCode}');
     print('Response Headers: ${response.headers}');
