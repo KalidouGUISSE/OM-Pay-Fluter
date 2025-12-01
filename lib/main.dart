@@ -57,7 +57,7 @@ class OrangeMoneyApp extends StatelessWidget {
             ),
             darkTheme: themeProvider.darkTheme,
             themeMode: themeProvider.themeMode,
-            initialRoute: '/connexion',
+            initialRoute: RouteApp.initialRoute,
             onGenerateRoute: RouteApp.generateRoute,
           );
         },

@@ -29,16 +29,22 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    // Assurer que les données utilisateur sont chargées
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = context.read<AuthProvider>();
-      if (authProvider.isAuthenticated && authProvider.userData == null) {
-        authProvider.fetchUserData();
-      }
-    });
-
     // Listener pour formater automatiquement les numéros de téléphone
     _recipientController.addListener(_formatPhoneNumber);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Assurer que les données utilisateur sont chargées quand les providers sont disponibles
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        if (authProvider.isAuthenticated && authProvider.userData == null) {
+          authProvider.fetchUserData();
+        }
+      }
+    });
   }
 
   @override
@@ -231,8 +237,10 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             // HEADER - Bonjour et QR Code
-            Consumer2<AuthProvider, TransactionProvider>(
-              builder: (context, authProvider, transactionProvider, child) {
+            Builder(
+              builder: (context) {
+                final authProvider = Provider.of<AuthProvider>(context);
+                final transactionProvider = Provider.of<TransactionProvider>(context);
                 final userName = authProvider.userData?.user.nom ?? 'Utilisateur';
                 return Container(
                   padding: const EdgeInsets.all(20),
