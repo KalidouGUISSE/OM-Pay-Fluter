@@ -1,4 +1,6 @@
 /// Classe utilitaire pour les validations d'entrée utilisateur.
+import 'transaction_types.dart';
+
 class Validator {
     /// Valide un numéro de téléphone (format international +221 ou local).
     static bool isValidPhoneNumber(String numero) {
@@ -15,13 +17,17 @@ class Validator {
 
     /// Valide un type de transaction.
     static bool isValidTransactionType(String type) {
-        const validTypes = ['transfert', "Transfert d'argent", 'dépôt', 'retrait'];
-        return validTypes.contains(type);
+        return TransactionType.isValid(type);
     }
 
     /// Valide un ID (chaîne non vide).
     static bool isValidId(String id) {
         return id.isNotEmpty;
+    }
+
+    /// Valide un code marchand (chaîne alphanumérique non vide).
+    static bool isValidMerchantCode(String code) {
+        return code.isNotEmpty && RegExp(r'^[A-Za-z0-9]+$').hasMatch(code);
     }
 
     /// Valide un OTP (code numérique de 4-6 chiffres).

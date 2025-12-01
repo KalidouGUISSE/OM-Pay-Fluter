@@ -5,6 +5,8 @@ import 'widgets/historique_widget.dart';
 import 'widgets/scanner_page.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
 import 'package:flutter_application_1/theme/transaction_provider.dart';
+import 'package:flutter_application_1/core/utils/validators.dart';
+import 'package:flutter_application_1/core/utils/transaction_types.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -17,6 +19,13 @@ class _HomePageState extends State<HomePage> {
   String selectedOperation = 'payer'; // 'payer' ou 'transferer'
   bool isBalanceVisible = false; // Contrôle la visibilité du solde
 
+  // Contrôleurs pour les champs de formulaire
+  final TextEditingController _recipientController = TextEditingController();
+  final TextEditingController _amountController = TextEditingController();
+
+  // États de chargement et d'erreur
+  bool _isCreatingTransaction = false;
+
   @override
   void initState() {
     super.initState();
@@ -27,6 +36,175 @@ class _HomePageState extends State<HomePage> {
         authProvider.fetchUserData();
       }
     });
+
+    // Listener pour formater automatiquement les numéros de téléphone
+    _recipientController.addListener(_formatPhoneNumber);
+  }
+
+  @override
+  void dispose() {
+    _recipientController.removeListener(_formatPhoneNumber);
+    _recipientController.dispose();
+    _amountController.dispose();
+    super.dispose();
+  }
+
+  /// Formate automatiquement les numéros de téléphone sénégalais
+  void _formatPhoneNumber() {
+    if (selectedOperation != 'transferer') return;
+
+    final text = _recipientController.text;
+    if (text.isEmpty) return;
+
+    // Éviter les appels récursifs
+    _recipientController.removeListener(_formatPhoneNumber);
+
+    String formatted = text;
+
+    // Si le texte commence par un chiffre et fait 9 chiffres (format sénégalais sans +221)
+    if (RegExp(r'^\d{9}$').hasMatch(text)) {
+      formatted = '+221$text';
+    }
+    // Si le texte fait 7 chiffres (commence par 7, 8, ou 9)
+    else if (RegExp(r'^[7-9]\d{6}$').hasMatch(text)) {
+      formatted = '+221$text';
+    }
+
+    // Mettre à jour seulement si le formatage a changé
+    if (formatted != text) {
+      _recipientController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+
+    _recipientController.addListener(_formatPhoneNumber);
+  }
+
+  /// Crée une transaction selon le type sélectionné
+  Future<void> _createTransaction() async {
+    final recipient = _recipientController.text.trim();
+    final amountText = _amountController.text.trim();
+
+    // Validation des champs
+    if (recipient.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez saisir le numéro/code destinataire'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (amountText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Veuillez saisir le montant'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validation du montant
+    final amount = double.tryParse(amountText);
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Montant invalide'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validation selon le type d'opération
+    if (selectedOperation == 'transferer') {
+      // Transfert d'argent - validation numéro téléphone
+      if (!Validator.isValidPhoneNumber(recipient)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Numéro de téléphone invalide (format: +221XXXXXXXXX)'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    } else if (selectedOperation == 'payer') {
+      // Paiement marchand - validation code marchand
+      if (!Validator.isValidMerchantCode(recipient)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Code marchand invalide'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+    }
+
+    // Démarrer la création
+    setState(() {
+      _isCreatingTransaction = true;
+    });
+
+    try {
+      final transactionProvider = context.read<TransactionProvider>();
+
+      TransactionType transactionTypeEnum;
+      String transactionType;
+      String recipientField;
+
+      if (selectedOperation == 'transferer') {
+        transactionTypeEnum = TransactionType.transfertArgent;
+        transactionType = transactionTypeEnum.displayName;
+        recipientField = recipient; // numéro du destinataire
+      } else {
+        transactionTypeEnum = TransactionType.paiementMarchand;
+        transactionType = transactionTypeEnum.displayName;
+        recipientField = recipient; // code_marchand
+      }
+
+      final transaction = await transactionProvider.createTransaction(
+        recipientField,
+        amount,
+        transactionType,
+      );
+
+      if (mounted) {
+        // Succès
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Transaction réussie! Référence: ${transaction?.reference ?? "N/A"}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Vider les champs
+        _recipientController.clear();
+        _amountController.clear();
+
+        // Recharger les données utilisateur pour mettre à jour l'historique
+        final authProvider = context.read<AuthProvider>();
+        await authProvider.fetchUserData();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la transaction: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCreatingTransaction = false;
+        });
+      }
+    }
   }
 
 
@@ -244,6 +422,8 @@ class _HomePageState extends State<HomePage> {
                               onTap: () {
                                 setState(() {
                                   selectedOperation = 'payer';
+                                  _recipientController.clear();
+                                  _amountController.clear();
                                 });
                               },
                               child: Row(
@@ -272,6 +452,8 @@ class _HomePageState extends State<HomePage> {
                               onTap: () {
                                 setState(() {
                                   selectedOperation = 'transferer';
+                                  _recipientController.clear();
+                                  _amountController.clear();
                                 });
                               },
                               child: Row(
@@ -323,8 +505,14 @@ class _HomePageState extends State<HomePage> {
                               child: Column(
                                 children: [
                                   TextField(
+                                    controller: _recipientController,
+                                    keyboardType: selectedOperation == 'transferer'
+                                        ? TextInputType.phone
+                                        : TextInputType.text,
                                     decoration: InputDecoration(
-                                      hintText: "Saisir le numéro/code m...",
+                                      hintText: selectedOperation == 'transferer'
+                                          ? "Numéro destinataire (77XXXXXXX)"
+                                          : "Code marchand",
                                       hintStyle: TextStyle(color: hintText),
                                       contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                                       border: OutlineInputBorder(
@@ -343,9 +531,12 @@ class _HomePageState extends State<HomePage> {
                                       fillColor: isDark ? Colors.grey[900] : Colors.grey[50],
                                     ),
                                     style: TextStyle(color: cardText),
+                                    enabled: !_isCreatingTransaction,
                                   ),
                                   const SizedBox(height: 10),
                                   TextField(
+                                    controller: _amountController,
+                                    keyboardType: TextInputType.number,
                                     decoration: InputDecoration(
                                       hintText: "Saisir le montant",
                                       hintStyle: TextStyle(color: hintText),
@@ -366,6 +557,7 @@ class _HomePageState extends State<HomePage> {
                                       fillColor: isDark ? Colors.grey[900] : Colors.grey[50],
                                     ),
                                     style: TextStyle(color: cardText),
+                                    enabled: !_isCreatingTransaction,
                                   ),
                                 ],
                               ),
@@ -436,15 +628,24 @@ class _HomePageState extends State<HomePage> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           elevation: 4,
                         ),
-                        onPressed: () {},
-                        child: const Text(
-                          "Valider",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
+                        onPressed: _isCreatingTransaction ? null : _createTransaction,
+                        child: _isCreatingTransaction
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                "Valider",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/models/derniere_transaction.dart';
+import 'package:flutter_application_1/core/utils/transaction_types.dart';
 
 class HistoriqueWidget extends StatelessWidget {
   final List<DerniereTransaction> transactions;
@@ -10,15 +11,21 @@ class HistoriqueWidget extends StatelessWidget {
   });
 
   IconData _getIcon(String type) {
-    switch (type) {
-      case 'Dépôt':
+    final transactionType = TransactionType.fromString(type);
+    if (transactionType == null) return Icons.payment;
+
+    switch (transactionType) {
+      case TransactionType.depot:
         return Icons.arrow_downward;
-      case 'Transfert d\'argent':
+      case TransactionType.transfertArgent:
         return Icons.phone_android;
-      case 'Achat Pass':
-        return Icons.home;
-      default:
-        return Icons.payment;
+      case TransactionType.paiementMarchand:
+      case TransactionType.achatPass:
+        return Icons.shopping_cart;
+      case TransactionType.retrait:
+        return Icons.arrow_upward;
+      case TransactionType.rechargeMobile:
+        return Icons.phone_iphone;
     }
   }
 
@@ -28,6 +35,31 @@ class HistoriqueWidget extends StatelessWidget {
       return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateStr;
+    }
+  }
+
+  String _getTransactionSubtitle(DerniereTransaction transaction) {
+    final type = transaction.typeTransaction.toLowerCase();
+    final contrepartie = transaction.contrepartie;
+
+    switch (type) {
+      case 'transfert d\'argent':
+      case 'transfert':
+        return contrepartie.isNotEmpty ? contrepartie : 'Transfert';
+      case 'paiement marchand':
+        return contrepartie.isNotEmpty ? 'Code: $contrepartie' : 'Marchand';
+      case 'dépôt d\'argent':
+      case 'dépôt':
+      case 'depot':
+        return contrepartie.isNotEmpty ? contrepartie : 'Dépôt';
+      case 'retrait d\'argent':
+      case 'retrait':
+        return contrepartie.isNotEmpty ? contrepartie : 'Retrait';
+      case 'recharge mobile':
+      case 'recharge':
+        return contrepartie.isNotEmpty ? contrepartie : 'Recharge';
+      default:
+        return contrepartie.isNotEmpty ? contrepartie : transaction.typeTransaction;
     }
   }
 
@@ -63,7 +95,7 @@ class HistoriqueWidget extends StatelessWidget {
                 ),
               ),
               Text(
-                transaction.contrepartie,
+                _getTransactionSubtitle(transaction),
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 12,

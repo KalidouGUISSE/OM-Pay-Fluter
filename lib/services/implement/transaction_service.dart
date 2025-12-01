@@ -62,12 +62,14 @@ class TransactionService implements ITransactionService{
 
     @override
     Future<Transaction> creerTransaction(String numero, double montant, String typeTransaction) async {
+      
         if (!Validator.isValidPhoneNumber(numero)) {
             throw ValidationException('Numéro de téléphone invalide');
         }
         if (!Validator.isValidAmount(montant.toString())) {
             throw ValidationException('Montant invalide');
         }
+              print("{{{{{{{{{{{{{{{{{{{{{===========creerTransaction=== response =======}}}}}}}}}}}}}}}}}}}}}");
         if (!Validator.isValidTransactionType(typeTransaction)) {
             throw ValidationException('Type de transaction invalide');
         }
@@ -81,6 +83,10 @@ class TransactionService implements ITransactionService{
                 'date':''
             });
 
+              print("{{{{{{{{{{{{{{{{{{{{{===========creerTransaction=== response =======}}}}}}}}}}}}}}}}}}}}}");
+              print(response);
+              print("{{{{{{{{{{{{{{{{{{{{{===========creerTransaction==== response =====}}}}}}}}}}}}}}}}}}}}}"); 
+
             final transaction = Transaction.fromJson(response['data']);
             if (!transaction.isValid()) {
                 AppLogger.logger.warning('Transaction créée invalide: ${transaction.id}');
@@ -89,7 +95,7 @@ class TransactionService implements ITransactionService{
             // Invalider le cache du solde après transaction
             SimpleCache.remove('solde_${apiClient.numero}');
             AppLogger.logger.info('Cache solde invalidé après transaction ${transaction.id}');
-    
+
             return transaction;
         } catch (e) {
             AppLogger.logger.severe('Erreur création transaction: $e');
