@@ -233,9 +233,8 @@ class _HomePageState extends State<HomePage> {
         iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.white),
       ),
       extendBodyBehindAppBar: true,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
+      body: Column(
+        children: [
             // HEADER - Bonjour et QR Code
             Builder(
               builder: (context) {
@@ -756,16 +755,17 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 12),
 
             // Historique
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final transactions = authProvider.userData?.dernieresTransactions ?? [];
-                return HistoriqueWidget(transactions: transactions);
-              },
+            Expanded(
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final transactions = authProvider.userData?.dernieresTransactions ?? [];
+                  return HistoriqueWidget(transactions: transactions);
+                },
+              ),
             ),
 
             const SizedBox(height: 20),
-          ],
-        ),
+        ],
       ),
     );
   }

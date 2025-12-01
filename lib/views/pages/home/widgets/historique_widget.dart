@@ -125,16 +125,17 @@ class HistoriqueWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: transactions.isEmpty
-            ? [const Text('Aucune transaction')]
-            : transactions
-                .map((transaction) => _buildTransactionItem(transaction, context))
-                .expand((widget) => [widget, const SizedBox(height: 15)])
-                .toList()
-              ..removeLast(), // Remove the last SizedBox
-      ),
+      child: transactions.isEmpty
+          ? const Text('Aucune transaction')
+          : SingleChildScrollView(
+              child: Column(
+                children: transactions
+                    .map((transaction) => _buildTransactionItem(transaction, context))
+                    .expand((widget) => [widget, const SizedBox(height: 15)])
+                    .toList()
+                  ..removeLast(), // Remove the last SizedBox
+              ),
+            ),
     );
   }
 }
