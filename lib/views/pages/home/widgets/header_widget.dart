@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/auth_provider.dart';
@@ -23,6 +24,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         final authProvider = Provider.of<AuthProvider>(context);
         final transactionProvider = Provider.of<TransactionProvider>(context);
         final userName = authProvider.userData?.user.nom ?? 'Utilisateur';
+        final codeQr = authProvider.userData?.compte.codeQr;
 
         return Container(
           padding: const EdgeInsets.all(20),
@@ -146,7 +148,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                       ],
                     ),
                   ),
-                  const SizedBox(
+                  SizedBox(
                     width: 102,
                     height: 102,
                     child: DecoratedBox(
@@ -161,7 +163,16 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                             color: Colors.white,
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
-                          child: Icon(Icons.qr_code_2, color: Colors.black, size: 70),
+                          child: codeQr != null && codeQr.isNotEmpty
+                            ? Image.memory(
+                                base64Decode(codeQr.split(',').last),
+                                width: 70,
+                                height: 70,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                  Icon(Icons.qr_code_2, color: Colors.black, size: 70),
+                              )
+                            : Icon(Icons.qr_code_2, color: Colors.black, size: 70),
                         ),
                       ),
                     ),

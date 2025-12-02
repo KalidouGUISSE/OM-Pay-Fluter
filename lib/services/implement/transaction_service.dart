@@ -76,16 +76,16 @@ class TransactionService implements ITransactionService{
 
         try {
             final requestBody = {
-                'recipient_number': numero,
-                'amount': montant,
-                'transaction_type': typeTransaction,
+                'numero du destinataire': numero,
+                'montant': montant,
+                'type_transaction': typeTransaction,
                 'date': ''
             };
 
             print('🔄 Creating transaction with body: $requestBody');
-            print('🔗 API URL: /api/v1/transactions');
+            print('🔗 API URL: /api/v1/transactions/${apiClient.numero}');
 
-            final response = await apiClient.post('/api/v1/transactions', requestBody);
+            final response = await apiClient.post('/api/v1/compte/${apiClient.numero}/transactions', requestBody);
 
               print("{{{{{{{{{{{{{{{{{{{{{===========creerTransaction=== response =======}}}}}}}}}}}}}}}}}}}}}");
               print(response);
