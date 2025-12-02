@@ -53,36 +53,47 @@ class ApiClient implements IApiClient {
 
     @override
     Future<Map<String, dynamic>> post(String path, Map<String, dynamic> body) async {
-        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========body============}}}}}}}}}}}}}}}}}}}\n');
-        // print(body);
-        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========body============}}}}}}}}}}}}}}}}}}}\n');
-        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========headers============}}}}}}}}}}}}}}}}}}}\n');
-        // print(_headers);
-        // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{==========headers============}}}}}}}}}}}}}}}}}}}\n');
+        print('\n📤 POST REQUEST: $baseUrl$path');
+        print('📋 Body: $body');
+        print('🔐 Headers: $_headers');
         return await ErrorHandler.withRetry(() async {
             final res = await http.post(
                 Uri.parse('$baseUrl$path'),
                 headers: _headers,
                 body: jsonEncode(body),
             ).timeout(Duration(milliseconds: Config.timeout));
-            // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{}}}}}}}}}}}}}}}}}}}\n');
-            // print("$baseUrl$path");
-            // print('Status Code: ${res.statusCode}');
-            // print('Response Body: ${res.body}');
-            // print(_processResponse(res));
-            // print('\n{{{{{{{{{{{{{}}}}}}}{{{{{{}}}}}}}}}}}}}}}}}}}\n');
+            print('📥 RESPONSE Status: ${res.statusCode}');
+            print('📄 Response Body: ${res.body}');
             return _processResponse(res);
         });
     }
 
     Map<String, dynamic> _processResponse(http.Response res) {
-        final data = jsonDecode(res.body);
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-            return data;
-        } else {
-            final message = data['message'] ?? 'Erreur API';
-            ErrorHandler.checkStatusCode(res.statusCode, message);
-            throw ApiException(message, statusCode: res.statusCode);
+        // Check for authentication errors (401, 403, or redirect to login)
+        if (res.statusCode == 401 || res.statusCode == 403) {
+            throw AuthenticationException('Session expirée. Veuillez vous reconnecter.');
+        }
+
+        try {
+            final data = jsonDecode(res.body);
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+                return data;
+            } else {
+                final message = data['message'] ?? 'Erreur API';
+                ErrorHandler.checkStatusCode(res.statusCode, message);
+                throw ApiException(message, statusCode: res.statusCode);
+            }
+        } catch (e) {
+            // If response is not valid JSON (e.g., HTML error page), create a meaningful error
+            if (e is FormatException) {
+                // Check if response contains login-related content
+                if (res.body.contains('login') || res.body.contains('auth')) {
+                    throw AuthenticationException('Session expirée. Veuillez vous reconnecter.');
+                }
+                final errorMessage = 'Erreur serveur: ${res.statusCode} - ${res.reasonPhrase ?? "Réponse invalide"}';
+                throw ApiException(errorMessage, statusCode: res.statusCode);
+            }
+            rethrow;
         }
     }
 }

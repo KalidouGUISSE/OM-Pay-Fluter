@@ -75,13 +75,17 @@ class TransactionService implements ITransactionService{
         }
 
         try {
-            final response = await apiClient.post('/api/v1/compte/${apiClient.numero}/transactions',
-            {
-                'numero du destinataire': numero,
-                'montant': montant,
-                'type_transaction': typeTransaction,
-                'date':''
-            });
+            final requestBody = {
+                'recipient_number': numero,
+                'amount': montant,
+                'transaction_type': typeTransaction,
+                'date': ''
+            };
+
+            print('🔄 Creating transaction with body: $requestBody');
+            print('🔗 API URL: /api/v1/transactions');
+
+            final response = await apiClient.post('/api/v1/transactions', requestBody);
 
               print("{{{{{{{{{{{{{{{{{{{{{===========creerTransaction=== response =======}}}}}}}}}}}}}}}}}}}}}");
               print(response);
@@ -99,6 +103,13 @@ class TransactionService implements ITransactionService{
             return transaction;
         } catch (e) {
             AppLogger.logger.severe('Erreur création transaction: $e');
+            // Re-throw with more context
+            if (e.toString().contains('Session expirée') || e.toString().contains('401') || e.toString().contains('403')) {
+                throw Exception('Votre session a expiré. Veuillez vous reconnecter.');
+            }
+            if (e.toString().contains('500')) {
+                throw Exception('Erreur du serveur. Veuillez réessayer plus tard.');
+            }
             rethrow;
         }
     }
