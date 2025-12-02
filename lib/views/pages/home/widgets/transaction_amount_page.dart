@@ -55,6 +55,11 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Transaction réussie: ${transaction?.id ?? 'ID inconnu'}')),
         );
+
+        // Mettre à jour les données utilisateur pour rafraîchir l'historique et le solde
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.fetchUserData();
+
         // Navigator.of(context).popUntil((route) => route.isFirst);
         Navigator.of(context).pushReplacementNamed('/home');
       }
