@@ -13,11 +13,17 @@ class TransactionService implements ITransactionService{
 
     @override
     Future<List<Transaction>> getAllTransactions() async {
+        final cacheKey = 'transactions_${apiClient.numero}';
+        final cached = SimpleCache.get<List<Transaction>>(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
+
         try {
             final encodedNumero = Uri.encodeComponent(apiClient.numero!);
             final response = await apiClient.get('/api/v1/compte/$encodedNumero/transactions');
             final transactionsData = response['data']['transactions'] as List<dynamic>? ?? [];
-            return transactionsData.map((json) {
+            final transactions = transactionsData.map((json) {
                 try {
                     final transaction = Transaction.fromJson(json as Map<String, dynamic>);
                     if (!transaction.isValid()) {
@@ -29,6 +35,10 @@ class TransactionService implements ITransactionService{
                     throw ValidationException('Erreur lors du parsing d\'une transaction');
                 }
             }).toList();
+
+            // Cacher pour 10 minutes
+            SimpleCache.set(cacheKey, transactions, Duration(minutes: 10));
+            return transactions;
         } catch (e) {
             AppLogger.logger.severe('Erreur récupération transactions: $e');
             rethrow;
@@ -95,10 +105,11 @@ class TransactionService implements ITransactionService{
             if (!transaction.isValid()) {
                 AppLogger.logger.warning('Transaction créée invalide: ${transaction.id}');
             }
-    
-            // Invalider le cache du solde après transaction
+
+            // Invalider le cache du solde et des transactions après transaction
             SimpleCache.remove('solde_${apiClient.numero}');
-            AppLogger.logger.info('Cache solde invalidé après transaction ${transaction.id}');
+            SimpleCache.remove('transactions_${apiClient.numero}');
+            AppLogger.logger.info('Cache solde et transactions invalidé après transaction ${transaction.id}');
 
             return transaction;
         } catch (e) {

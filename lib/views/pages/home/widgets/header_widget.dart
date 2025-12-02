@@ -1,8 +1,9 @@
-import 'dart:convert';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/auth_provider.dart';
 import '../../../../theme/transaction_provider.dart';
+import '../../../../core/utils/image_cache.dart' as qr_cache;
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key});
@@ -164,15 +165,21 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                             borderRadius: BorderRadius.all(Radius.circular(12)),
                           ),
                           child: codeQr != null && codeQr.isNotEmpty
-                            ? Image.memory(
-                                base64Decode(codeQr.split(',').last),
-                                width: 70,
-                                height: 70,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                  Icon(Icons.qr_code_2, color: Colors.black, size: 70),
-                              )
-                            : Icon(Icons.qr_code_2, color: Colors.black, size: 70),
+                              ? FutureBuilder<ui.Image?>(
+                                  future: qr_cache.QrImageCache.getQrImage(codeQr),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.hasData && snapshot.data != null) {
+                                      return RawImage(
+                                        image: snapshot.data,
+                                        width: 70,
+                                        height: 70,
+                                        fit: BoxFit.cover,
+                                      );
+                                    }
+                                    return Icon(Icons.qr_code_2, color: Colors.black, size: 70);
+                                  },
+                                )
+                              : Icon(Icons.qr_code_2, color: Colors.black, size: 70),
                         ),
                       ),
                     ),

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/me_data.dart';
@@ -7,6 +8,11 @@ import '../config/exceptions.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthService authService;
   final SharedPreferences prefs;
+
+  // Constantes pour le cache
+  static const String _userDataCacheKey = 'cached_user_data';
+  static const String _userDataTimestampKey = 'cached_user_data_timestamp';
+  static const Duration _userDataCacheDuration = Duration(minutes: 30);
 
   String? _tempToken;
   DateTime? _tempTokenExpiry;
@@ -39,10 +45,48 @@ class AuthProvider extends ChangeNotifier {
     _refreshToken = prefs.getString('refresh_token');
     _numeroTelephone = prefs.getString('numero_telephone');
 
+    // Charger MeData depuis cache si valide
+    _loadUserDataFromCache();
+
     if (_accessToken != null) {
       authService.apiClient.setToken(_accessToken!);
       // Le numéro sera défini lors de fetchUserData()
     }
+  }
+
+  /// Charge les données utilisateur depuis le cache
+  void _loadUserDataFromCache() {
+    final cachedData = prefs.getString(_userDataCacheKey);
+    final timestampStr = prefs.getString(_userDataTimestampKey);
+
+    if (cachedData != null && timestampStr != null) {
+      final timestamp = DateTime.tryParse(timestampStr);
+      if (timestamp != null && DateTime.now().difference(timestamp) < _userDataCacheDuration) {
+        try {
+          final jsonData = jsonDecode(cachedData);
+          _userData = MeData.fromJson(jsonData);
+        } catch (e) {
+          // Cache corrompu, ignorer
+          _clearUserDataCache();
+        }
+      } else {
+        // Cache expiré
+        _clearUserDataCache();
+      }
+    }
+  }
+
+  /// Sauvegarde les données utilisateur en cache
+  Future<void> _saveUserDataToCache(MeData data) async {
+    final jsonData = jsonEncode(data.toJson());
+    await prefs.setString(_userDataCacheKey, jsonData);
+    await prefs.setString(_userDataTimestampKey, DateTime.now().toIso8601String());
+  }
+
+  /// Vide le cache des données utilisateur
+  Future<void> _clearUserDataCache() async {
+    await prefs.remove(_userDataCacheKey);
+    await prefs.remove(_userDataTimestampKey);
   }
 
   /// Étape 1 : Initier la connexion avec le numéro de téléphone
@@ -124,6 +168,18 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
 
+    // Vérifier si données en cache sont encore valides
+    if (_userData != null) {
+      final timestampStr = prefs.getString(_userDataTimestampKey);
+      if (timestampStr != null) {
+        final timestamp = DateTime.tryParse(timestampStr);
+        if (timestamp != null && DateTime.now().difference(timestamp) < _userDataCacheDuration) {
+          // Cache valide, pas besoin de refetch
+          return true;
+        }
+      }
+    }
+
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -132,6 +188,8 @@ class AuthProvider extends ChangeNotifier {
       final response = await authService.me();
       if (response.isValid()) {
         _userData = response.data;
+        // Sauvegarder en cache
+        await _saveUserDataToCache(_userData!);
         // Définir le numéro de compte dans le client API
         if (_userData?.compte.numero_telephone != null) {
           authService.apiClient.numero = _userData!.compte.numero_telephone;
@@ -163,6 +221,7 @@ class AuthProvider extends ChangeNotifier {
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
     await prefs.remove('numero_telephone');
+    await _clearUserDataCache();
 
     authService.apiClient.token = null;
     authService.apiClient.numero = null;

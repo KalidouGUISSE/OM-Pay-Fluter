@@ -1,15 +1,19 @@
 /// Cache simple en mémoire pour les données fréquentes.
 class SimpleCache {
     static final Map<String, _CacheEntry> _cache = {};
+    static int _cacheHits = 0;
+    static int _cacheMisses = 0;
 
     /// Récupère une valeur du cache si elle n'est pas expirée.
-    static T? get<T>(String key) 
+    static T? get<T>(String key)
     {
         final entry = _cache[key];
         if (entry != null && !entry.isExpired) {
+            _cacheHits++;
             return entry.value as T;
         }
         _cache.remove(key);
+        _cacheMisses++;
         return null;
     }
 
@@ -28,6 +32,11 @@ class SimpleCache {
     static void clear()
     {
         _cache.clear();
+    }
+
+    /// Obtient les statistiques du cache
+    static Map<String, int> getCacheStats() {
+        return {'hits': _cacheHits, 'misses': _cacheMisses};
     }
 }
 
