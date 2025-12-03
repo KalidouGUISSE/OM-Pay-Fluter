@@ -65,6 +65,10 @@ class AuthProvider extends ChangeNotifier {
         try {
           final jsonData = jsonDecode(cachedData);
           _userData = MeData.fromJson(jsonData);
+          // Définir le numéro dans le client API depuis les données cachées
+          if (_userData?.compte.numero_telephone != null) {
+            authService.apiClient.numero = _userData!.compte.numero_telephone;
+          }
         } catch (e) {
           // Cache corrompu, ignorer
           _clearUserDataCache();

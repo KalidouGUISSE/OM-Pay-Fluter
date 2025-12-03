@@ -38,11 +38,30 @@ class _HomePageState extends State<HomePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     // Assurer que les données utilisateur sont chargées quand les providers sont disponibles
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+
+        // Récupérer les données utilisateur si nécessaire
         if (authProvider.isAuthenticated && authProvider.userData == null) {
-          authProvider.fetchUserData();
+          await authProvider.fetchUserData();
+        }
+
+        // Récupérer automatiquement le solde après authentification si pas déjà chargé
+        if (authProvider.isAuthenticated && authProvider.userData != null && transactionProvider.balance == null && !transactionProvider.isLoadingBalance) {
+          final success = await transactionProvider.fetchBalance();
+          if (!success && mounted) {
+            // Gestion d'erreur silencieuse - le solde sera récupéré manuellement par l'utilisateur
+            // On peut logger l'erreur ou afficher un message subtil
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Impossible de récupérer le solde automatiquement. Vous pouvez le consulter manuellement.'),
+                duration: Duration(seconds: 3),
+                backgroundColor: Colors.orange,
+              ),
+            );
+          }
         }
       }
     });

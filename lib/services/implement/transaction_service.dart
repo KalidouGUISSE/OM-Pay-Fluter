@@ -50,22 +50,41 @@ class TransactionService implements ITransactionService{
         final cacheKey = 'solde_${apiClient.numero}';
         final cached = SimpleCache.get<double>(cacheKey);
         if (cached != null) {
+            AppLogger.logger.info('Solde récupéré depuis le cache: $cached');
             return cached;
         }
+
+        if (apiClient.numero == null || apiClient.numero!.isEmpty) {
+            AppLogger.logger.severe('Numéro de téléphone non défini pour récupération solde');
+            throw Exception('Numéro de téléphone requis pour récupérer le solde');
+        }
+
+        AppLogger.logger.info('Récupération du solde pour le numéro: ${apiClient.numero}');
         final result = await apiClient.get('/api/v1/compte/${apiClient.numero}/solde');
-        print("{{{{{{{{{{{{{{{{{{{{{===========result==========}}}}}}}}}}}}}}}}}}}}}");
-        print(result);
-        print("{{{{{{{{{{{{{{{{{{{{{===========result==========}}}}}}}}}}}}}}}}}}}}}");
-        final soldeStr = result['data']['solde']?.toString();
+
+        AppLogger.logger.info('Réponse API solde: $result');
+
+        // Essayer différentes structures de réponse possibles
+        dynamic soldeValue = result['data']?['solde'] ?? result['solde'] ?? result['balance'] ?? result['montant'];
+
+        String? soldeStr;
+        if (soldeValue != null) {
+            soldeStr = soldeValue.toString();
+            AppLogger.logger.info('Valeur solde trouvée: $soldeStr');
+        } else {
+            AppLogger.logger.warning('Aucune valeur solde trouvée dans la réponse');
+            soldeStr = '0';
+        }
 
         // Convertir proprement en double
-        final solde = double.tryParse(soldeStr ?? '0') ?? 0.0;
+        final solde = double.tryParse(soldeStr) ?? 0.0;
+
+        if (solde == 0.0 && soldeStr != '0') {
+            AppLogger.logger.warning('Échec du parsing du solde: "$soldeStr" -> 0.0');
+        }
 
         SimpleCache.set(cacheKey, solde, Duration(minutes: Config.cacheTtlMinutes));
-
-        print("{{{{{{{{{{{{{{{{{{{{{===========solde==========}}}}}}}}}}}}}}}}}}}}}");
-        print(solde);
-        print("{{{{{{{{{{{{{{{{{{{{{===========solde==========}}}}}}}}}}}}}}}}}}}}}");
+        AppLogger.logger.info('Solde mis en cache: $solde');
 
         return solde;
     }
