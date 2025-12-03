@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../theme/language_provider.dart';
 import 'scanner_page.dart';
 
 class TransactionFormWidget extends StatefulWidget {
@@ -27,6 +29,7 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final languageProvider = Provider.of<LanguageProvider>(context);
     final primaryBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final secondaryBg = isDark ? const Color(0xFF2D2D2D) : Colors.grey[50];
     final cardText = isDark ? Colors.white : Colors.black87;
@@ -78,7 +81,7 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "Payer",
+                            languageProvider.getText('payer'),
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: cardText,
@@ -104,7 +107,7 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            "Transférer",
+                            languageProvider.getText('transferer'),
                             style: TextStyle(color: cardText, fontSize: 14),
                           ),
                         ],
@@ -148,8 +151,8 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                                 : TextInputType.text,
                             decoration: InputDecoration(
                               hintText: widget.selectedOperation == 'transferer'
-                                  ? "Numéro destinataire (77XXXXXXX)"
-                                  : "Code marchand",
+                                  ? languageProvider.getText('numero_destinataire')
+                                  : languageProvider.getText('code_marchand'),
                               hintStyle: TextStyle(color: hintText),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                               border: OutlineInputBorder(
@@ -175,7 +178,7 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                             controller: widget.amountController,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                              hintText: "Saisir le montant",
+                              hintText: languageProvider.getText('saisir_montant'),
                               hintStyle: TextStyle(color: hintText),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                               border: OutlineInputBorder(
@@ -231,7 +234,7 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                "Cliquer et\nscanner",
+                                languageProvider.getText('cliquer_scanner'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 11,
@@ -275,8 +278,8 @@ class _TransactionFormWidgetState extends State<TransactionFormWidget> {
                           valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         ),
                       )
-                    : const Text(
-                        "Valider",
+                    : Text(
+                        languageProvider.getText('valider'),
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,

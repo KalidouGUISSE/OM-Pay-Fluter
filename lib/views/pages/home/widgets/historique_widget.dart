@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_application_1/models/derniere_transaction.dart';
 import 'package:flutter_application_1/core/utils/transaction_types.dart';
+import 'package:flutter_application_1/theme/language_provider.dart';
 
 class HistoriqueWidget extends StatelessWidget {
   final List<DerniereTransaction> transactions;
@@ -126,7 +128,7 @@ class HistoriqueWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       child: transactions.isEmpty
-          ? const Text('Aucune transaction')
+          ? Text(Provider.of<LanguageProvider>(context).getText('aucune_transaction'))
           : SingleChildScrollView(
               child: Column(
                 children: transactions

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../theme/language_provider.dart';
 
 class PayTransferCard extends StatefulWidget {
   const PayTransferCard({super.key});
@@ -12,6 +14,8 @@ class _PayTransferCardState extends State<PayTransferCard> {
 
   @override
   Widget build(BuildContext context) {
+    final languageProvider = Provider.of<LanguageProvider>(context);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15),
       padding: const EdgeInsets.all(15),
@@ -36,7 +40,7 @@ class _PayTransferCardState extends State<PayTransferCard> {
                       color: Colors.orange,
                     ),
                     const SizedBox(width: 5),
-                    const Text("Payer"),
+                    Text(languageProvider.getText('payer')),
                   ],
                 ),
               ),
@@ -50,7 +54,7 @@ class _PayTransferCardState extends State<PayTransferCard> {
                       color: Colors.orange,
                     ),
                     const SizedBox(width: 5),
-                    const Text("Transférer"),
+                    Text(languageProvider.getText('transferer')),
                   ],
                 ),
               ),
@@ -59,9 +63,9 @@ class _PayTransferCardState extends State<PayTransferCard> {
 
           const SizedBox(height: 10),
 
-          TextField(decoration: InputDecoration(labelText: "Saisir le numéro/code")),
+          TextField(decoration: InputDecoration(labelText: languageProvider.getText('saisir_destinataire'))),
           const SizedBox(height: 10),
-          TextField(decoration: InputDecoration(labelText: "Saisir le montant")),
+          TextField(decoration: InputDecoration(labelText: languageProvider.getText('saisir_montant'))),
 
           const SizedBox(height: 15),
 
@@ -70,7 +74,7 @@ class _PayTransferCardState extends State<PayTransferCard> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
               onPressed: () {},
-              child: const Text("Valider"),
+              child: Text(languageProvider.getText('valider')),
             ),
           )
         ],

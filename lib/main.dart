@@ -5,6 +5,7 @@ import 'package:flutter_application_1/views/router/router.dart';
 import 'package:flutter_application_1/theme/theme_provider.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
 import 'package:flutter_application_1/theme/transaction_provider.dart';
+import 'package:flutter_application_1/theme/language_provider.dart';
 import 'package:flutter_application_1/core/services/api_client.dart';
 import 'package:flutter_application_1/services/implement/auth_service.dart';
 import 'package:flutter_application_1/services/implement/transaction_service.dart';
@@ -38,6 +39,7 @@ class OrangeMoneyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(
           create: (_) => AuthProvider(authService: authService, prefs: prefs),
         ),

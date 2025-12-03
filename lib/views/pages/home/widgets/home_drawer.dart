@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/theme_provider.dart';
+import '../../../../theme/language_provider.dart';
 import 'scanner_page.dart';
 
 class HomeDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Drawer(
       child: Container(
@@ -28,7 +30,7 @@ class HomeDrawer extends StatelessWidget {
             const SizedBox(height: 30),
 
             SwitchListTile(
-              title: const Text("Sombre"),
+              title: Text(languageProvider.getText('sombre')),
               value: themeProvider.isDark,
               activeColor: Colors.orange,
               onChanged: (value) => themeProvider.toggleTheme(value),
@@ -37,7 +39,7 @@ class HomeDrawer extends StatelessWidget {
             const SizedBox(height: 10),
 
             SwitchListTile(
-              title: const Text("Scanner"),
+              title: Text(languageProvider.getText('scanner')),
               value: true,
               activeColor: Colors.orange,
               onChanged: (_) {
@@ -53,18 +55,23 @@ class HomeDrawer extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            const ListTile(
+            ListTile(
               leading: Icon(Icons.language),
-              title: Text("Français"),
+              title: Text(languageProvider.getText('francais')),
+              onTap: () {
+                languageProvider.setLanguage(
+                  languageProvider.currentLanguage == 'fr' ? 'en' : 'fr'
+                );
+              },
             ),
 
             const Spacer(),
 
-            const ListTile(
+            ListTile(
               leading: Icon(Icons.logout),
-              title: Text("Se déconnecter"),
+              title: Text(languageProvider.getText('se_deconnecter')),
             ),
-            const Text("OMPAY Version - 1.1.0(35)"),
+            Text(languageProvider.getText('version')),
           ],
         ),
       ),

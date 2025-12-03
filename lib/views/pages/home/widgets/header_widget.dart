@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/auth_provider.dart';
 import '../../../../theme/transaction_provider.dart';
+import '../../../../theme/language_provider.dart';
 import '../../../../core/utils/image_cache.dart' as qr_cache;
 
 class HeaderWidget extends StatefulWidget {
@@ -24,6 +25,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
       builder: (context) {
         final authProvider = Provider.of<AuthProvider>(context);
         final transactionProvider = Provider.of<TransactionProvider>(context);
+        final languageProvider = Provider.of<LanguageProvider>(context);
         final userName = authProvider.userData?.user.nom ?? 'Utilisateur';
         final codeQr = authProvider.userData?.compte.codeQr;
 
@@ -52,8 +54,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                         RichText(
                           text: TextSpan(
                             children: [
-                              const TextSpan(
-                                text: "Bonjour ",
+                              TextSpan(
+                                text: languageProvider.getText('bonjour'),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
@@ -130,7 +132,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('Erreur: ${transactionProvider.balanceError ?? "Impossible de récupérer le solde"}'),
+                                        content: Text('${languageProvider.getText('erreur')} ${transactionProvider.balanceError ?? languageProvider.getText('solde_impossible')}'),
                                         backgroundColor: Colors.red,
                                       ),
                                     );

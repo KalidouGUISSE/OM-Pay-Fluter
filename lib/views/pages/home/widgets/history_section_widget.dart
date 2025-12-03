@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/auth_provider.dart';
+import '../../../../theme/language_provider.dart';
 import 'historique_widget.dart';
 
 class HistorySectionWidget extends StatelessWidget {
@@ -10,6 +11,7 @@ class HistorySectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardText = isDark ? Colors.white : Colors.black87;
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Column(
       children: [
@@ -20,7 +22,7 @@ class HistorySectionWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Historique",
+                languageProvider.getText('historique'),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

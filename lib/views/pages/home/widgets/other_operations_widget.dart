@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../theme/language_provider.dart';
 
 class OtherOperationsWidget extends StatelessWidget {
   const OtherOperationsWidget({super.key});
@@ -7,6 +9,7 @@ class OtherOperationsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardText = isDark ? Colors.white : Colors.black87;
+    final languageProvider = Provider.of<LanguageProvider>(context);
 
     return Column(
       children: [
@@ -16,7 +19,7 @@ class OtherOperationsWidget extends StatelessWidget {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              "Pour toute autre opération",
+              languageProvider.getText('pour_toute_autre_operation'),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -61,8 +64,8 @@ class OtherOperationsWidget extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    const Text(
-                      "Accéder à Max it",
+                    Text(
+                      languageProvider.getText('acceder_max_it'),
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

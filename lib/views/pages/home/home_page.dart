@@ -7,6 +7,7 @@ import 'widgets/other_operations_widget.dart';
 import 'widgets/history_section_widget.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
 import 'package:flutter_application_1/theme/transaction_provider.dart';
+import 'package:flutter_application_1/theme/language_provider.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
 import 'package:flutter_application_1/core/utils/transaction_types.dart';
 
@@ -55,8 +56,8 @@ class _HomePageState extends State<HomePage> {
             // Gestion d'erreur silencieuse - le solde sera récupéré manuellement par l'utilisateur
             // On peut logger l'erreur ou afficher un message subtil
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Impossible de récupérer le solde automatiquement. Vous pouvez le consulter manuellement.'),
+              SnackBar(
+                content: Text(context.read<LanguageProvider>().getText('solde_impossible')),
                 duration: Duration(seconds: 3),
                 backgroundColor: Colors.orange,
               ),
@@ -115,8 +116,8 @@ class _HomePageState extends State<HomePage> {
     // Validation des champs
     if (recipient.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez saisir le numéro/code destinataire'),
+        SnackBar(
+          content: Text(context.read<LanguageProvider>().getText('saisir_destinataire')),
           backgroundColor: Colors.red,
         ),
       );
@@ -125,8 +126,8 @@ class _HomePageState extends State<HomePage> {
 
     if (amountText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez saisir le montant'),
+        SnackBar(
+          content: Text(context.read<LanguageProvider>().getText('saisir_montant')),
           backgroundColor: Colors.red,
         ),
       );
@@ -137,8 +138,8 @@ class _HomePageState extends State<HomePage> {
     final amount = double.tryParse(amountText);
     if (amount == null || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Montant invalide'),
+        SnackBar(
+          content: Text(context.read<LanguageProvider>().getText('montant_invalide')),
           backgroundColor: Colors.red,
         ),
       );
@@ -150,8 +151,8 @@ class _HomePageState extends State<HomePage> {
       // Transfert d'argent - validation numéro téléphone
       if (!Validator.isValidPhoneNumber(recipient)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Numéro de téléphone invalide (format: +221XXXXXXXXX)'),
+          SnackBar(
+            content: Text(context.read<LanguageProvider>().getText('telephone_invalide')),
             backgroundColor: Colors.red,
           ),
         );
@@ -161,8 +162,8 @@ class _HomePageState extends State<HomePage> {
       // Paiement marchand - validation code marchand
       if (!Validator.isValidMerchantCode(recipient)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Code marchand invalide'),
+          SnackBar(
+            content: Text(context.read<LanguageProvider>().getText('code_marchand_invalide')),
             backgroundColor: Colors.red,
           ),
         );
@@ -202,7 +203,7 @@ class _HomePageState extends State<HomePage> {
         // Succès
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Transaction réussie! Référence: ${transaction?.reference ?? "N/A"}'),
+            content: Text('${context.read<LanguageProvider>().getText('transaction_reussie')} ${transaction?.reference ?? "N/A"}'),
             backgroundColor: Colors.green,
           ),
         );
@@ -219,7 +220,7 @@ class _HomePageState extends State<HomePage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la transaction: $e'),
+            content: Text('${context.read<LanguageProvider>().getText('erreur_transaction')} $e'),
             backgroundColor: Colors.red,
           ),
         );
