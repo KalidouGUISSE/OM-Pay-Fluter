@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:flutter_application_1/main.dart';
+import 'package:flutter_application_1/core/utils/routes.dart';
 
 void main() {
   testWidgets('Counter increments smoke test', (WidgetTester tester) async {
@@ -18,7 +19,7 @@ void main() {
     final prefs = await SharedPreferences.getInstance();
 
     // Build our app and trigger a frame.
-    await tester.pumpWidget(OrangeMoneyApp(prefs: prefs));
+    await tester.pumpWidget(OrangeMoneyApp(prefs: prefs, initialRoute: AppRoutes.connexion));
 
     // Verify that our counter starts at 0.
     expect(find.text('0'), findsOneWidget);

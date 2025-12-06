@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_application_1/views/router/router.dart';
+import 'package:flutter_application_1/core/utils/routes.dart';
 import 'package:flutter_application_1/theme/theme_provider.dart';
 import 'package:flutter_application_1/theme/auth_provider.dart';
 import 'package:flutter_application_1/theme/transaction_provider.dart';
@@ -11,22 +12,35 @@ import 'package:flutter_application_1/services/implement/auth_service.dart';
 import 'package:flutter_application_1/services/implement/transaction_service.dart';
 import 'package:flutter_application_1/config/config.dart';
 
+Future<String> _determineInitialRoute(SharedPreferences prefs) async {
+  // Vérifier si l'utilisateur a un token d'accès valide
+  final accessToken = prefs.getString('access_token');
+  if (accessToken != null && accessToken.isNotEmpty) {
+    return AppRoutes.home;
+  }
+  return AppRoutes.connexion;
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialiser Config depuis config.yaml
   Config.load();
-  
+
   // Initialiser SharedPreferences
   final prefs = await SharedPreferences.getInstance();
-  
-  runApp(OrangeMoneyApp(prefs: prefs));
+
+  // Déterminer la route initiale
+  final initialRoute = await _determineInitialRoute(prefs);
+
+  runApp(OrangeMoneyApp(prefs: prefs, initialRoute: initialRoute));
 }
 
 class OrangeMoneyApp extends StatelessWidget {
   final SharedPreferences prefs;
-  
-  const OrangeMoneyApp({required this.prefs, super.key});
+  final String initialRoute;
+
+  const OrangeMoneyApp({required this.prefs, required this.initialRoute, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +73,7 @@ class OrangeMoneyApp extends StatelessWidget {
             ),
             darkTheme: themeProvider.darkTheme,
             themeMode: themeProvider.themeMode,
-            initialRoute: RouteApp.initialRoute,
+            initialRoute: initialRoute,
             onGenerateRoute: RouteApp.generateRoute,
           );
         },

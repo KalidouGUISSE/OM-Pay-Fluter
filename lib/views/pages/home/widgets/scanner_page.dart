@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../models/qr_data.dart';
+import '../../../../core/utils/routes.dart';
 import 'transaction_amount_page.dart';
 
 class ScannerPage extends StatefulWidget {
@@ -75,6 +76,22 @@ class _ScannerPageState extends State<ScannerPage> {
         title: const Text("Scanner QR Code"),
         backgroundColor: Colors.black87,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            try {
+              Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Erreur lors du retour à l\'accueil'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          tooltip: 'Retour à l\'accueil',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.flip_camera_ios),

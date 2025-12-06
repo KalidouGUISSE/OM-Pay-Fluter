@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../models/qr_data.dart';
+import '../../../../core/utils/routes.dart';
 import '../../../../theme/auth_provider.dart';
 import '../../../../theme/transaction_provider.dart';
 
@@ -85,6 +86,22 @@ class _TransactionAmountPageState extends State<TransactionAmountPage> {
         title: const Text('Montant du transfert'),
         backgroundColor: Colors.black87,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.home),
+          onPressed: () {
+            try {
+              Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Erreur lors du retour à l\'accueil'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          tooltip: 'Retour à l\'accueil',
+        ),
       ),
       body: Container(
         color: isDark ? const Color(0xFF1E1E1E) : Colors.black,

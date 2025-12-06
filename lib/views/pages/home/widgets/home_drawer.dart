@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/theme_provider.dart';
 import '../../../../theme/language_provider.dart';
+import '../../../../theme/auth_provider.dart';
+import '../../../../theme/transaction_provider.dart';
+import '../../../../core/utils/routes.dart';
 import 'scanner_page.dart';
 
 class HomeDrawer extends StatelessWidget {
@@ -70,6 +73,31 @@ class HomeDrawer extends StatelessWidget {
             ListTile(
               leading: Icon(Icons.logout),
               title: Text(languageProvider.getText('se_deconnecter')),
+              onTap: () async {
+                // Fermer le drawer d'abord
+                Navigator.pop(context);
+
+                try {
+                  // Récupérer les providers
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  final transactionProvider = Provider.of<TransactionProvider>(context, listen: false);
+
+                  // Effectuer la déconnexion
+                  await authProvider.logout();
+                  transactionProvider.reset();
+
+                  // Naviguer vers la page de connexion
+                  Navigator.of(context).pushReplacementNamed(AppRoutes.connexion);
+                } catch (e) {
+                  // Afficher un message d'erreur en cas de problème
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur lors de la déconnexion: ${e.toString()}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
             ),
             Text(languageProvider.getText('version')),
           ],
