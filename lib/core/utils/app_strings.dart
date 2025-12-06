@@ -43,6 +43,8 @@ class AppStrings {
       'montant_du_transfert': 'Montant du transfert',
       // Historique
       'aucune_transaction': 'Aucune transaction',
+      'details_transaction': 'Détails de la transaction',
+      'fermer': 'Fermer',
       // Header
       'erreur': 'Erreur',
       // Router
@@ -95,6 +97,8 @@ class AppStrings {
       'montant_du_transfert': 'Transfer amount',
       // Historique
       'aucune_transaction': 'No transactions',
+      'details_transaction': 'Transaction Details',
+      'fermer': 'Close',
       // Header
       'erreur': 'Error',
       // Router

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_application_1/models/derniere_transaction.dart';
 import 'package:flutter_application_1/core/utils/transaction_types.dart';
 import 'package:flutter_application_1/theme/language_provider.dart';
+import 'transaction_details_dialog.dart';
 
 class HistoriqueWidget extends StatelessWidget {
   final List<DerniereTransaction> transactions;
@@ -72,54 +73,69 @@ class HistoriqueWidget extends StatelessWidget {
     final color = transaction.direction == 'credit' ? Colors.green : Colors.red;
     final amountText = '$sign ${transaction.montant.toStringAsFixed(0)} CFA';
 
-    return Row(
-      children: [
-        Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Icon(_getIcon(transaction.typeTransaction), size: 28, color: Colors.grey[600]),
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => TransactionDetailsDialog(transactionId: transaction.id),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: isDark ? Colors.grey[800] : Colors.grey[50],
         ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                transaction.typeTransaction,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: cardText,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                _getTransactionSubtitle(transaction),
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
+        child: Row(
           children: [
-            Text(
-              amountText,
-              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(_getIcon(transaction.typeTransaction), size: 28, color: Colors.grey[600]),
             ),
-            Text(
-              _formatDate(transaction.date),
-              style: TextStyle(color: Colors.grey[600], fontSize: 11),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    transaction.typeTransaction,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: cardText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    _getTransactionSubtitle(transaction),
+                    style: TextStyle(
+                      color: Colors.grey[600],
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  amountText,
+                  style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+                Text(
+                  _formatDate(transaction.date),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
   }
 
