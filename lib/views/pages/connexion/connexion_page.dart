@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/carousel_connexion.dart';
 import 'widgets/form_connexion.dart';
+import 'package:flutter/services.dart';
 
 class ConnexionPage extends StatefulWidget {
   const ConnexionPage({super.key});
@@ -36,7 +37,12 @@ class _ConnexionPageState extends State<ConnexionPage> with WidgetsBindingObserv
     // ensure top is within reasonable bounds
     top = top.clamp(10.0, screenHeight - 620.0) as double;
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        SystemNavigator.pop();
+        return false;
+      },
+      child: Scaffold(
       body: Stack(
         children: [
             // AnimatedPositioned(
@@ -57,6 +63,7 @@ class _ConnexionPageState extends State<ConnexionPage> with WidgetsBindingObserv
               child: FormConnexion(),
             ),
         ],
+      ),
       ),
     );
   }

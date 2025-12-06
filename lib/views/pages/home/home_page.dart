@@ -11,6 +11,7 @@ import 'package:flutter_application_1/theme/language_provider.dart';
 import 'package:flutter_application_1/core/utils/validators.dart';
 import 'package:flutter_application_1/core/utils/transaction_types.dart';
 
+import 'package:flutter/services.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -240,7 +241,12 @@ class _HomePageState extends State<HomePage> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
-    return Scaffold(
+    return WillPopScope(
+      onWillPop: () async {
+        SystemNavigator.pop();
+        return false;
+      },
+      child: Scaffold(
       backgroundColor: primaryBg,
       drawer: HomeDrawer(),
       appBar: AppBar(
@@ -285,6 +291,7 @@ class _HomePageState extends State<HomePage> {
               child: HistorySectionWidget(),
             ),
         ],
+      ),
       ),
     );
   }

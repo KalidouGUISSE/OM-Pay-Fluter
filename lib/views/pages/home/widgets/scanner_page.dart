@@ -22,7 +22,7 @@ class _ScannerPageState extends State<ScannerPage> {
     super.dispose();
   }
 
-  void _processScannedData(BarcodeCapture capture) {
+  Future<void> _processScannedData(BarcodeCapture capture) async {
     if (_isProcessing) return;
 
     final List<Barcode> barcodes = capture.barcodes;
@@ -38,14 +38,14 @@ class _ScannerPageState extends State<ScannerPage> {
       final qrData = QrData.fromJson(jsonData);
 
       if (qrData.isValid()) {
-        controller.stop();
+        await controller.stop();
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => TransactionAmountPage(qrData: qrData),
           ),
-        ).then((_) {
-          controller.start();
+        ).then((_) async {
+          await controller.start();
           setState(() => _isProcessing = false);
         });
       } else {
