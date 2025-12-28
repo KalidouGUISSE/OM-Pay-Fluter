@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() async {
-  final url = 'https://om-pay.onrender.com/api/v1/auth/initiate-login';
+  final url = 'https://om-pay-production.up.railway.app/api/v1/auth/initiate-login';
   final headers = {'Content-Type': 'application/json'};
   final body = jsonEncode({'numeroTelephone': '+221784458786'});
 

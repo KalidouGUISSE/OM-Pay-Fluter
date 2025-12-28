@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../theme/auth_provider.dart';
+import '../../../theme/transaction_provider.dart';
 
 class VerifyOtpPage extends StatefulWidget {
   final String? phoneNumber;
@@ -56,6 +57,12 @@ class _VerifyOtpPageState extends State<VerifyOtpPage> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Authentification réussie')),
               );
+
+              // Précharger les détails des transactions en arrière-plan
+              final transactionProvider = context.read<TransactionProvider>();
+              // Ne pas attendre pour ne pas bloquer la navigation
+              transactionProvider.preloadAllTransactions();
+
               Navigator.of(context).pushReplacementNamed('/home');
             } else {
               // Erreur lors du chargement des données utilisateur

@@ -132,6 +132,40 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Précharge toutes les transactions de l'utilisateur en arrière-plan
+  Future<void> preloadAllTransactions() async {
+    try {
+      AppLogger.logger.info('Début du préchargement des transactions');
+
+      // Récupérer la liste des transactions de base
+      final allTransactions = await transactionService.getAllTransactions();
+
+      // Pour chaque transaction, récupérer les détails complets si pas déjà en cache
+      for (final transaction in allTransactions) {
+        if (!_transactionCache.containsKey(transaction.id)) {
+          try {
+            // Récupérer les détails complets en arrière-plan
+            final fullTransaction = await transactionService.getByIdTransactions(transaction.id);
+            // Stocker dans le cache du provider
+            _transactionCache[transaction.id] = fullTransaction;
+            AppLogger.logger.info('Transaction ${transaction.id} préchargée et mise en cache');
+          } catch (e) {
+            AppLogger.logger.warning('Erreur lors du préchargement de la transaction ${transaction.id}: $e');
+            // Continuer avec les autres transactions même si une échoue
+          }
+        }
+      }
+
+      // Notifier les listeners que le cache a été mis à jour
+      notifyListeners();
+
+      AppLogger.logger.info('Préchargement des transactions terminé');
+    } catch (e) {
+      AppLogger.logger.severe('Erreur lors du préchargement des transactions: $e');
+      // Ne pas propager l'erreur pour ne pas bloquer l'authentification
+    }
+  }
+
   /// Réinitialise le solde (utile lors de la déconnexion)
   void reset() {
     _balance = null;

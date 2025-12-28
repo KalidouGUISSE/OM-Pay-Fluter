@@ -1,5 +1,5 @@
 api:
-  base_url: "https://om-pay.onrender.com"
+  base_url: "https://om-pay-production.up.railway.app"
   timeout: 60000
   retry_attempts: 3
 
